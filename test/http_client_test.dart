@@ -2,7 +2,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
+//import 'package:flutter_test/flutter_test.dart';
 
 ///
 /// https://dev.to/graphicbeacon/quick-tip-how-to-make-http-requests-dart-56dd
@@ -16,7 +17,7 @@ void test1() async {
   var response = await request.close(); // sends the request
 
   // transforms and prints the response
-  await for (var contents in response.transform(Utf8Decoder())) {
+  await for (var contents in response.transform(const Utf8Decoder())) {
     print('test1 result:');
     print(contents);
   }
@@ -32,7 +33,7 @@ void main() async {
         .getUrl(Uri.parse('https://swapi.co/api/people/1'))
         .then((request) => request.close()) // sends the request
         .then((response) => response
-            .transform(Utf8Decoder())
+        .transform(const Utf8Decoder())
             .listen(print)); // transforms and prints the response
 
     print('2');

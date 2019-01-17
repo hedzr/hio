@@ -1,5 +1,6 @@
-//import 'package:test/test.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
+
+//import 'package:flutter_test/flutter_test.dart';
 import 'package:hio/hio.dart';
 
 void main() {
@@ -11,10 +12,10 @@ void main() {
   Future<String> lookUpVersion() async => '1.0.0';
 
   test('swapi.co api test', () async {
-    var api = new Api()
+    var api = Api()
       ..debugHeader = true
       ..debugBody = false
-      ..baseUrl = "https://swapi.co/api/"
+      ..baseUrl = 'https://swapi.co/api/'
       ..addOnSendHandler((req) {
         return true;
       })
@@ -38,10 +39,10 @@ void main() {
   test('github api test', () async {
     print(await lookUpVersion());
 
-    var api = new Api()
+    var api = Api()
       ..debugHeader = true
       ..debugBody = false
-      ..baseUrl = "https://api.github.com/"
+      ..baseUrl = 'https://api.github.com/'
       ..accept = 'application/vnd.github.v3+json'
       ..addOnSendHandler((req) {
         return true;

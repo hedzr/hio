@@ -17,12 +17,12 @@ typedef void ApiErrorFn(dynamic err, HttpClientResponse resp);
 typedef bool ApiOnSendFn(HttpClientRequest req);
 typedef dynamic ApiOnProcessDataFn(dynamic data, HttpClientResponse resp);
 
-void blockedDelay({int days: 0,
-  int hours: 0,
-  int minutes: 0,
-  int seconds: 0,
-  int milliseconds: 1000,
-  int microseconds: 0}) async {
+void blockedDelay({int days = 0,
+  int hours = 0,
+  int minutes = 0,
+  int seconds = 0,
+  int milliseconds = 1000,
+  int microseconds = 0}) async {
   return Future<void>.delayed(Duration(
       days: days,
       hours: hours,
@@ -44,15 +44,15 @@ class Api {
 
   bool get debugHeader => _debugHeader;
 
-  set debugHeader(value) => _debugHeader = value;
+  set debugHeader(bool value) => _debugHeader = value;
 
   bool debugBody = false;
 
-  String _baseUrl = "https://api.github.com/";
+  String _baseUrl = 'https://api.github.com/';
 
   String get baseUrl => _baseUrl;
 
-  set baseUrl(value) => _baseUrl = value;
+  set baseUrl(String value) => _baseUrl = value;
 
   String accept;
   Duration connectionTimeout;
@@ -61,15 +61,14 @@ class Api {
   List<ApiOnSendFn> _onSendFns;
 
   void addOnSendHandler(ApiOnSendFn fn) {
-    if (_onSendFns == null) _onSendFns = new List<ApiOnSendFn>();
+    _onSendFns ??= <ApiOnSendFn>[];
     _onSendFns.add(fn);
   }
 
   List<ApiOnProcessDataFn> _onProcessDataFns;
 
   void addOnProcessDataHandler(ApiOnProcessDataFn fn) {
-    if (_onProcessDataFns == null)
-      _onProcessDataFns = new List<ApiOnProcessDataFn>();
+    _onProcessDataFns ??= <ApiOnProcessDataFn>[];
     _onProcessDataFns.add(fn);
   }
 
@@ -79,10 +78,10 @@ class Api {
       Map<String, dynamic> queryParams,
       Map<String, dynamic> bodyParams,
       params = const {}}) {
-    return new ApiCall(
+    return ApiCall(
         this,
-        "GET",
-        "$baseUrl$apiEntry",
+        'GET',
+        '$baseUrl$apiEntry',
         headers,
         urlParams,
         queryParams, bodyParams);
@@ -111,13 +110,13 @@ class ApiCall {
 
   ApiOkFn get success => _successFn;
 
-  set success(value) => _successFn = value;
+  set success(ApiOkFn value) => _successFn = value;
 
   ApiErrorFn _errorFn;
 
   ApiErrorFn get error => _errorFn;
 
-  set error(value) => _errorFn = value;
+  set error(ApiErrorFn value) => _errorFn = value;
 
   Future<HttpClientResponse> go(
       {String method,
@@ -130,10 +129,10 @@ class ApiCall {
     if (apiEntry != null && apiEntry.isNotEmpty)
       _url = '${_api.baseUrl}$apiEntry';
 
-    if (_headers == null) _headers = {};
-    if (_urlParams == null) _urlParams = {};
-    if (_queryParams == null) _queryParams = {};
-    if (_bodyParams == null) _bodyParams = {};
+    _headers ??= {};
+    _urlParams ??= {};
+    _queryParams ??= {};
+    _bodyParams ??= {};
 
     if (_api.accept != null && _api.accept.isNotEmpty) {
       //if (_headers.containsKey(HttpHeaders.acceptHeader)) _headers.remove(HttpHeaders.acceptHeader);
@@ -159,7 +158,7 @@ class ApiCall {
       _bodyParams.addAll(bodyParams);
     }
 
-    var httpClient = new HttpClient();
+    var httpClient = HttpClient();
     if (_api.connectionTimeout != null)
       httpClient.connectionTimeout = _api.connectionTimeout;
     if (_api.userAgent != null && _api.userAgent.isNotEmpty)
@@ -252,13 +251,13 @@ class ApiCall {
   Uri _buildUrl(String urlString) {
     var uri1 = Uri.parse(urlString);
 
-    var qp = new Map<String, dynamic>();
+    var qp = <String, dynamic>{};
     qp.addAll(uri1.queryParameters);
     qp.forEach((k, v) => _queryParams.remove(k));
     qp.addAll(_queryParams);
 
-    var ps = new List<String>();
-    uri1.pathSegments.forEach((el) {
+    var ps = <String>[];
+    for (var el in uri1.pathSegments) {
       if (el.startsWith(':')) {
         var k = el.substring(1);
         if (_urlParams != null && _urlParams.containsKey(k)) {
@@ -269,9 +268,9 @@ class ApiCall {
       } else {
         ps.add(el);
       }
-    });
+    }
 
-    var uri = new Uri(
+    var uri = Uri(
         scheme: uri1.scheme,
         userInfo: uri1.userInfo,
         host: uri1.host,
@@ -289,38 +288,38 @@ class ApiCall {
   }
 }
 
-class Api2 {
-  var _ipAddress = 'Unknown';
-
-  _getIPAddress() async {
-    var url = 'https://httpbin.org/ip';
-    var httpClient = new HttpClient();
-
-    String result;
-    try {
-      var request = await httpClient.getUrl(Uri.parse(url));
-      var response = await request.close();
-      if (response.statusCode == HttpStatus.ok) {
-        var json = await response.transform(utf8.decoder).join();
-
-        /// https://api.dartlang.org/stable/2.1.0/dart-convert/dart-convert-library.html
-        var data = jsonDecode(json);
-        result = data['origin'];
-      } else {
-        result =
-            'Error getting IP address:\nHttp status ${response.statusCode}';
-      }
-    } catch (exception) {
-      result = 'Failed getting IP address';
-    }
-
-//    // If the widget was removed from the tree while the message was in flight,
-//    // we want to discard the reply rather than calling setState to update our
-//    // non-existent appearance.
-//    if (!mounted) return;
+//class Api2 {
+//  var _ipAddress = 'Unknown';
 //
-//    setState(() {
-//      _ipAddress = result;
-//    });
-  }
-}
+//  _getIPAddress() async {
+//    var url = 'https://httpbin.org/ip';
+//    var httpClient = new HttpClient();
+//
+//    String result;
+//    try {
+//      var request = await httpClient.getUrl(Uri.parse(url));
+//      var response = await request.close();
+//      if (response.statusCode == HttpStatus.ok) {
+//        var json = await response.transform(utf8.decoder).join();
+//
+//        /// https://api.dartlang.org/stable/2.1.0/dart-convert/dart-convert-library.html
+//        var data = jsonDecode(json);
+//        result = data['origin'];
+//      } else {
+//        result =
+//            'Error getting IP address:\nHttp status ${response.statusCode}';
+//      }
+//    } catch (exception) {
+//      result = 'Failed getting IP address';
+//    }
+//
+////    // If the widget was removed from the tree while the message was in flight,
+////    // we want to discard the reply rather than calling setState to update our
+////    // non-existent appearance.
+////    if (!mounted) return;
+////
+////    setState(() {
+////      _ipAddress = result;
+////    });
+//  }
+//}
