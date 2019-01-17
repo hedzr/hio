@@ -22,17 +22,17 @@ class ApiCall {
   ApiCall(this._api, this._method, this._url, this._headers, this._urlParams,
       this._queryParams, this._bodyParams);
 
-  ApiOkFn _successFn;
+  ApiOkFn _successFn1;
 
-  ApiOkFn get success => _successFn;
+  ApiOkFn get successCB => _successFn1 ?? _api.successCB;
 
-  set success(ApiOkFn value) => _successFn = value;
+  set successCB(ApiOkFn value) => _successFn1 = value;
 
-  ApiErrorFn _errorFn;
+  ApiErrorFn _errorFn1;
 
-  ApiErrorFn get error => _errorFn;
+  ApiErrorFn get errorCB => _errorFn1 ?? _api.errorCB;
 
-  set error(ApiErrorFn value) => _errorFn = value;
+  set errorCB(ApiErrorFn value) => _errorFn1 = value;
 
   Future<HttpClientResponse> go(
       {String method,
@@ -133,14 +133,14 @@ class ApiCall {
               if (fn != null) data = fn(data, response);
             }
           }
-          if (_successFn != null) _successFn(data, response);
+          if (successCB != null) successCB(data, response);
         } else {
           print('[api] json failed: $jsonX');
-          if (_errorFn != null) _errorFn('json failed', response);
+          if (errorCB != null) errorCB('json failed', response);
         }
       } else {
         print('[api] error: response.statusCode = ${response.statusCode}');
-        if (_errorFn != null) _errorFn(response.statusCode, response);
+        if (errorCB != null) errorCB(response.statusCode, response);
       }
     });
     //} catch (e) {

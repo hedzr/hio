@@ -42,6 +42,10 @@ class Api {
     _onProcessDataFns.add(fn);
   }
 
+  ApiOkFn successCB;
+
+  ApiErrorFn errorCB;
+
   ApiCall call(String apiEntry,
       {String method = 'GET',
       Map<String, String> headers,

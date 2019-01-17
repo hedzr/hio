@@ -24,16 +24,16 @@ void main() {
       });
 
     var x = api.get('people/:id', urlParams: {'id': 1})
-      ..success = (data, resp) {
+      ..successCB = (data, resp) {
         print('data received: $data');
       }
-      ..error = (err, resp) {
+      ..errorCB = (err, resp) {
         print('ERROR: $err');
       };
 
     await x.go();
 
-    print('--------------------- swapi.co api test ok.');
+    print('--------------------- swapi.co api test ok..');
   });
 
   test('github api test', () async {
@@ -52,16 +52,16 @@ void main() {
       });
 
     var x = api.get('users/:user/repos', urlParams: {'user': 'hedzr'})
-      ..success = (data, resp) {
+      ..successCB = (data, resp) {
         print('data received: $data');
       }
-      ..error = (err, resp) {
+      ..errorCB = (err, resp) {
         print('ERROR: $err');
       };
 
     await x.go();
 
-    print('--------------------- github api test ok.');
+    print('--------------------- github api test ok..');
     //await x.go(urlParams: {'user': 'flutter'});
   });
 }
