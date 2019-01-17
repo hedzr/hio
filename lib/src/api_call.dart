@@ -4,13 +4,13 @@ import 'dart:io';
 import 'package:hio/src/api.dart';
 import 'package:hio/src/types.dart';
 
-abstract class Opt {
-  factory Opt.create() {
-    return DefaultOpt();
+abstract class _Opt {
+  factory _Opt.create() {
+    return ApiOpt();
   }
 }
 
-class DefaultOpt with Opt {
+class ApiOpt with _Opt {
   String method;
   String url;
   Map<String, String> headers;
@@ -18,18 +18,18 @@ class DefaultOpt with Opt {
   Map<String, dynamic> queryParams;
   Map<String, dynamic> bodyParams;
 
-  DefaultOpt();
+  ApiOpt();
 
-  DefaultOpt.init(this.method, this.url, this.headers, this.urlParams,
+  ApiOpt.init(this.method, this.url, this.headers, this.urlParams,
       this.queryParams, this.bodyParams);
 
-  factory DefaultOpt.create(String method,
+  factory ApiOpt.create(String method,
       String url,
       Map<String, String> headers,
       Map<String, dynamic> urlParams,
       Map<String, dynamic> queryParams,
       Map<String, dynamic> bodyParams) =>
-      DefaultOpt.init(method, url, headers, urlParams, queryParams, bodyParams);
+      ApiOpt.init(method, url, headers, urlParams, queryParams, bodyParams);
 
   @override
   String toString() {
@@ -41,7 +41,7 @@ class DefaultOpt with Opt {
   }
 }
 
-class Broker<AC extends DefaultOpt> {
+class ApiBroker<AC extends ApiOpt> {
   Api<AC> api;
 
   AC _pkg;
@@ -58,10 +58,10 @@ class Broker<AC extends DefaultOpt> {
 
   set errorCB(ApiErrorFn<AC> value) => _errorFn1 = value;
 
-  Broker(this.api, this._pkg);
+  ApiBroker(this.api, this._pkg);
 
-  factory Broker.create(AC strategy, Api<AC> api) {
-    var bac = Broker<AC>(api, strategy);
+  factory ApiBroker.create(AC strategy, Api<AC> api) {
+    var bac = ApiBroker<AC>(api, strategy);
     return bac;
   }
 

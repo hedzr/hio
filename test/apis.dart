@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:hio/hio.dart';
 
-class GithubOpt extends DefaultOpt {
+class GithubOpt extends ApiOpt {
   int xRateLimitLimit = 60;
   int xRateLimitRemaining = 59;
   int xRateLimitReset = 1547617535;
@@ -89,7 +89,7 @@ class GithubApi extends Api<GithubOpt> {
   }
 
   @override
-  Broker<GithubOpt> call(String apiEntry,
+  ApiBroker<GithubOpt> call(String apiEntry,
       {String method = 'GET',
       Map<String, String> headers,
       Map<String, dynamic> urlParams,
@@ -103,7 +103,7 @@ class GithubApi extends Api<GithubOpt> {
   }
 }
 
-class SwApi extends Api<DefaultOpt> {
+class SwApi extends Api<ApiOpt> {
   SwApi() : super() {
     this
       ..debugHeader = true

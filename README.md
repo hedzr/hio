@@ -30,7 +30,7 @@ import 'package:hio/hio.dart';
 
 void getRepos(String username) async {
   try {
-    var api = new Api<DefaultOpt>()
+    var api = new Api<ApiOpt>()
       ..debugHeader = true
       ..baseUrl = "https://api.github.com/";
 
@@ -52,7 +52,7 @@ void getRepos(String username) async {
 
 ```dart
 void getSomething(String username) async {
-    var api = new Api<DefaultOpt>()
+    var api = new Api<ApiOpt>()
       ..debugHeader = true
       ..baseUrl = "https://api.github.com/"
       // using a global callback to parse the json object.
@@ -82,7 +82,7 @@ void getSomething(String username) async {
 #### Define your API class (swapi.co)
 
 ```dart
-class SwApi extends Api<DefaultOpt> {
+class SwApi extends Api<ApiOpt> {
   SwApi() : super() {
     this
       ..debugHeader = true
@@ -114,7 +114,7 @@ void run() async {
 
 ```dart
 
-class GithubOpt extends DefaultOpt {
+class GithubOpt extends ApiOpt {
   int xRateLimitLimit = 60;
   int xRateLimitRemaining = 59;
   int xRateLimitReset = 1547617535;
@@ -192,7 +192,7 @@ class GithubApi extends Api<GithubOpt> {
   }
 
   @override
-  Broker<GithubOpt> call(String apiEntry,
+  ApiBroker<GithubOpt> call(String apiEntry,
       {String method = 'GET',
       Map<String, String> headers,
       Map<String, dynamic> urlParams,

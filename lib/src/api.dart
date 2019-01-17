@@ -16,7 +16,7 @@ class ApiUtil {
 /// Using Api class:
 ///
 ///
-class Api<AC extends DefaultOpt> extends ApiUtil {
+class Api<AC extends ApiOpt> extends ApiUtil {
   bool _debugHeader = false;
 
   bool get debugHeader => _debugHeader;
@@ -210,27 +210,27 @@ class Api<AC extends DefaultOpt> extends ApiUtil {
 
   String getUrl(String apiEntry) => '$baseUrl$apiEntry';
 
-  final List<Broker<AC>> _opts = [];
+  final List<ApiBroker<AC>> _opts = [];
 
-  Broker<AC> create(AC strategy) {
+  ApiBroker<AC> create(AC strategy) {
     var x = _createOpt(strategy);
     _opts.add(x);
     return x;
   }
 
-  Broker<AC> _createOpt(AC strategy) => Broker<AC>.create(strategy, this);
+  ApiBroker<AC> _createOpt(AC strategy) => ApiBroker<AC>.create(strategy, this);
 
   /// `call(...)` should be invoked only from an Api-derived class with
-  /// AC=[DefaultOpt].
+  /// AC=[ApiOpt].
   ///
-  Broker<AC> call(String apiEntry,
+  ApiBroker<AC> call(String apiEntry,
       {String method = 'GET',
       Map<String, String> headers,
       Map<String, dynamic> urlParams,
       Map<String, dynamic> queryParams,
       Map<String, dynamic> bodyParams,
         Map<String, dynamic> params = const {}}) {
-    var opt = DefaultOpt.init(
+    var opt = ApiOpt.init(
         method, getUrl(apiEntry), headers, urlParams, queryParams, bodyParams);
     return create(opt as AC);
   }
