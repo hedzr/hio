@@ -23,7 +23,9 @@ class GithubOpt extends DefaultOpt {
       Map<String, dynamic> urlParams,
       Map<String, dynamic> queryParams,
       Map<String, dynamic> bodyParams)
-      : super.init(method, url, headers, urlParams, queryParams, bodyParams);
+      : super.init(method, url, headers, urlParams, queryParams, bodyParams){
+    links ??= <String, String>{};
+  }
 
 //  factory GithubApiCall.create(
 //          String method,
@@ -34,6 +36,36 @@ class GithubOpt extends DefaultOpt {
 //          Map<String, dynamic> bodyParams) =>
 //      GithubApiCall.init(
 //          method, url, headers, urlParams, queryParams, bodyParams);
+
+  void _parseLinks(String link) {
+    for (var ss1 in link.split(',')) {
+      print('$ss1');
+      var ss2 = ss1.split(';');
+      var link = ApiUtil.trim(ss2[0].trim(), chars: '<>');
+      var rel = ss2[1].trim();
+      if (rel.startsWith('rel=')) rel = rel.substring(4);
+      rel = ApiUtil.trim(rel, chars: '"');
+      links[rel] = link;
+    }
+  }
+
+  void parseHeaders(HttpHeaders headers) {
+    headers.forEach((k, values) {
+      // 'cache-control',
+      //GithubApiCall cc = c;
+      if (k == 'link') {
+        _parseLinks(values[0]);
+      } else if (k == 'x-ratelimit-limit') {
+        cc.xRateLimitLimit = int.tryParse(values[0]) ?? 0;
+      } else if (k == 'x-ratelimit-remaining') {
+        cc.xRateLimitRemaining = int.tryParse(values[0]) ?? 0;
+      } else if (k == 'x-ratelimit-reset') {
+        cc.xRateLimitReset = int.tryParse(values[0]) ?? 0;
+      } else if (k == 'x-github-request-id') {
+        cc.xGitHubRequestId = values[0];
+      }
+    });
+  }
 }
 
 class GithubApi extends Api<GithubOpt> {
@@ -46,30 +78,7 @@ class GithubApi extends Api<GithubOpt> {
       ..addOnSendHandler((req, c) => true)
       ..addOnProcessDataHandler(
           (dynamic data, HttpClientResponse resp, GithubOpt cc) {
-        resp.headers.forEach((k, values) {
-          // 'cache-control',
-          //GithubApiCall cc = c;
-          cc.links ??= <String, String>{};
-          if (k == 'link') {
-            for (var ss1 in values[0].split(',')) {
-              print('$ss1');
-              var ss2 = ss1.split(';');
-              var link = trim(ss2[0].trim(), chars: '<>');
-              var rel = ss2[1].trim();
-              if (rel.startsWith('rel=')) rel = rel.substring(4);
-              rel = trim(rel, chars: '"');
-              cc.links[rel] = link;
-            }
-          } else if (k == 'x-ratelimit-limit') {
-            cc.xRateLimitLimit = int.tryParse(values[0]) ?? 0;
-          } else if (k == 'x-ratelimit-remaining') {
-            cc.xRateLimitRemaining = int.tryParse(values[0]) ?? 0;
-          } else if (k == 'x-ratelimit-reset') {
-            cc.xRateLimitReset = int.tryParse(values[0]) ?? 0;
-          } else if (k == 'x-github-request-id') {
-            cc.xGitHubRequestId = values[0];
-          }
-        });
+            cc.parseHeaders(resp.headers);
         return data;
       });
   }

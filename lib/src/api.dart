@@ -2,7 +2,7 @@ import 'package:hio/src/api_call.dart';
 import 'package:hio/src/types.dart';
 
 class ApiUtil {
-  String trim(String s, {String chars = ' '}) {
+  static String trim(String s, {String chars = ' '}) {
     for (var i = 0; i < chars.length; i++) {
       var char = chars[i];
       if (s.startsWith(char)) s = s.substring(1);
