@@ -1,6 +1,6 @@
 name: hio
 description: Enhanced Http Client for Dart/Flutter. Make Api call easy, an Dart/Flutter package.
-version: 0.2.9
+version: 0.3.1
 author: Hedzr Yeh <hedzrz@gmail.com>
 homepage: https://github.com/hedzr/hio
 
