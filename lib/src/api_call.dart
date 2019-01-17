@@ -4,35 +4,74 @@ import 'dart:io';
 import 'package:hio/src/api.dart';
 import 'package:hio/src/types.dart';
 
-///
-/// ApiCall
-///
-class ApiCall {
-  Api _api;
-  String _method;
-  String _url;
-  Map<String, String> _headers;
-  Map<String, dynamic> _urlParams;
-  Map<String, dynamic> _queryParams;
-  Map<String, dynamic> _bodyParams;
+abstract class Opt {
+  factory Opt.create() {
+    return DefaultOpt();
+  }
+}
 
-  static const String DEFAULT_USER_AGENT =
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3642.0 Safari/537.36';
+class DefaultOpt with Opt {
+  String method;
+  String url;
+  Map<String, String> headers;
+  Map<String, dynamic> urlParams;
+  Map<String, dynamic> queryParams;
+  Map<String, dynamic> bodyParams;
 
-  ApiCall(this._api, this._method, this._url, this._headers, this._urlParams,
-      this._queryParams, this._bodyParams);
+  DefaultOpt();
 
-  ApiOkFn _successFn1;
+  DefaultOpt.init(this.method, this.url, this.headers, this.urlParams,
+      this.queryParams, this.bodyParams);
 
-  ApiOkFn get successCB => _successFn1 ?? _api.successCB;
+  factory DefaultOpt.create(String method,
+      String url,
+      Map<String, String> headers,
+      Map<String, dynamic> urlParams,
+      Map<String, dynamic> queryParams,
+      Map<String, dynamic> bodyParams) =>
+      DefaultOpt.init(method, url, headers, urlParams, queryParams, bodyParams);
 
-  set successCB(ApiOkFn value) => _successFn1 = value;
+  @override
+  String toString() {
+    return 'DefaultOpt[$toStringPart()]';
+  }
 
-  ApiErrorFn _errorFn1;
+  String toStringPart() {
+    return 'method:$method, url:$url';
+  }
+}
 
-  ApiErrorFn get errorCB => _errorFn1 ?? _api.errorCB;
+class Broker<AC extends DefaultOpt> {
+  Api<AC> api;
 
-  set errorCB(ApiErrorFn value) => _errorFn1 = value;
+  AC _pkg;
+
+  ApiOkFn<AC> _successFn1;
+
+  ApiOkFn<AC> get successCB => _successFn1 ?? api.successCB;
+
+  set successCB(ApiOkFn<AC> value) => _successFn1 = value;
+
+  ApiErrorFn<AC> _errorFn1;
+
+  ApiErrorFn<AC> get errorCB => _errorFn1 ?? api.errorCB;
+
+  set errorCB(ApiErrorFn<AC> value) => _errorFn1 = value;
+
+  Broker(this.api, this._pkg);
+
+  factory Broker.create(AC strategy, Api<AC> api) {
+    var bac = Broker<AC>(api, strategy);
+    return bac;
+  }
+
+  void invoke(dynamic data, HttpClientResponse resp) {
+    if (successCB != null) successCB(data, resp, _pkg);
+  }
+
+  void invokeError(dynamic err, HttpClientResponse resp) {
+    if (errorCB != null) errorCB(err, resp, _pkg);
+  }
 
   Future<HttpClientResponse> go(
       {String method,
@@ -41,73 +80,75 @@ class ApiCall {
       Map<String, dynamic> urlParams,
       Map<String, dynamic> queryParams,
       Map<String, dynamic> bodyParams}) async {
-    if (method != null && method.isNotEmpty) _method = method;
+    if (method != null && method.isNotEmpty) _pkg.method = method;
     if (apiEntry != null && apiEntry.isNotEmpty)
-      _url = '${_api.baseUrl}$apiEntry';
+      _pkg.url = '${api.baseUrl}$apiEntry';
 
-    _headers ??= {};
-    _urlParams ??= {};
-    _queryParams ??= {};
-    _bodyParams ??= {};
+    _pkg.headers ??= {};
+    _pkg.urlParams ??= {};
+    _pkg.queryParams ??= {};
+    _pkg.bodyParams ??= {};
 
-    if (_api.accept != null && _api.accept.isNotEmpty) {
+    if (api.accept != null && api.accept.isNotEmpty) {
       //if (_headers.containsKey(HttpHeaders.acceptHeader)) _headers.remove(HttpHeaders.acceptHeader);
       //_headers.putIfAbsent(HttpHeaders.acceptHeader, () => _api.accept);
-      _headers[HttpHeaders.acceptHeader] = _api.accept;
+      _pkg.headers[HttpHeaders.acceptHeader] = api.accept;
     }
 
     if (headers != null && headers.isNotEmpty) {
-      headers.forEach((k, v) => _headers.remove(k));
-      _headers.addAll(headers);
+      headers.forEach((k, v) => _pkg.headers.remove(k));
+      _pkg.headers.addAll(headers);
     }
 
     if (urlParams != null && urlParams.isNotEmpty) {
-      urlParams.forEach((k, v) => _urlParams.remove(k));
-      _urlParams.addAll(urlParams);
+      urlParams.forEach((k, v) => _pkg.urlParams.remove(k));
+      _pkg.urlParams.addAll(urlParams);
     }
     if (queryParams != null && queryParams.isNotEmpty) {
-      queryParams.forEach((k, v) => _queryParams.remove(k));
-      _queryParams.addAll(queryParams);
+      queryParams.forEach((k, v) => _pkg.queryParams.remove(k));
+      _pkg.queryParams.addAll(queryParams);
     }
     if (bodyParams != null && bodyParams.isNotEmpty) {
-      bodyParams.forEach((k, v) => _bodyParams.remove(k));
-      _bodyParams.addAll(bodyParams);
+      bodyParams.forEach((k, v) => _pkg.bodyParams.remove(k));
+      _pkg.bodyParams.addAll(bodyParams);
     }
 
     var httpClient = HttpClient();
-    if (_api.connectionTimeout != null)
-      httpClient.connectionTimeout = _api.connectionTimeout;
-    if (_api.userAgent != null && _api.userAgent.isNotEmpty)
-      httpClient.userAgent = _api.userAgent;
+    if (api.connectionTimeout != null)
+      httpClient.connectionTimeout = api.connectionTimeout;
+    if (api.userAgent != null && api.userAgent.isNotEmpty)
+      httpClient.userAgent = api.userAgent;
     else
       httpClient.userAgent = DEFAULT_USER_AGENT;
 
-    var uri = _buildUrl(_url);
+    var uri = _buildUrl(_pkg.url);
 
     //try {
-    return httpClient.openUrl(_method, uri).then((HttpClientRequest request) {
+    return httpClient
+        .openUrl(_pkg.method, uri)
+        .then((HttpClientRequest request) {
       // Optionally set up headers...
       // Optionally write to the request object...
       // Then call close.
-      if (_headers != null && _headers.isNotEmpty) {
-        _headers.forEach((k, v) {
+      if (_pkg.headers != null && _pkg.headers.isNotEmpty) {
+        _pkg.headers.forEach((k, v) {
           request.headers.add(k, v);
         });
       }
       request.headers
           .set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br');
-      if (_api.onSendFns != null && _api.onSendFns.isNotEmpty) {
-        for (var fn in _api.onSendFns) {
-          if (fn != null && fn(request) == false) return request.close();
-        }
-      }
-      if (_bodyParams != null && _bodyParams.isNotEmpty) {
-        request.write(json.encode(_bodyParams));
+
+      for (var fn in api?.onSendFns) {
+        if (fn != null && fn(request, _pkg) == false) return request.close();
       }
 
-      if (_api.debugHeader) {
+      if (_pkg.bodyParams != null && _pkg.bodyParams.isNotEmpty) {
+        request.write(json.encode(_pkg.bodyParams));
+      }
+
+      if (api.debugHeader) {
         print('[api] header: ${request.headers}');
-        print('[api] bodyParams: $_bodyParams');
+        print('[api] bodyParams: ${_pkg.bodyParams}');
       }
 
       return request.close();
@@ -122,25 +163,24 @@ class ApiCall {
         /// https://api.dartlang.org/stable/2.1.0/dart-convert/dart-convert-library.html
         var data = json.decode(jsonX);
 
-        if (_api.debugBody) {
+        if (api.debugBody) {
           print('[api] data (json.decoded): $data');
         }
 
         if (data != null) {
-          if (_api.onProcessDataFns != null &&
-              _api.onProcessDataFns.isNotEmpty) {
-            for (var fn in _api.onProcessDataFns) {
-              if (fn != null) data = fn(data, response);
+          if (api.onProcessDataFns != null && api.onProcessDataFns.isNotEmpty) {
+            for (var fn in api.onProcessDataFns) {
+              if (fn != null) data = fn(data, response, _pkg);
             }
           }
-          if (successCB != null) successCB(data, response);
+          invoke(data, response);
         } else {
           print('[api] json failed: $jsonX');
-          if (errorCB != null) errorCB('json failed', response);
+          invokeError('json error', response);
         }
       } else {
         print('[api] error: response.statusCode = ${response.statusCode}');
-        if (errorCB != null) errorCB(response.statusCode, response);
+        invokeError(response.statusCode, response);
       }
     });
     //} catch (e) {
@@ -169,15 +209,15 @@ class ApiCall {
 
     var qp = <String, dynamic>{};
     qp.addAll(uri1.queryParameters);
-    qp.forEach((k, v) => _queryParams.remove(k));
-    qp.addAll(_queryParams);
+    qp.forEach((k, v) => _pkg.queryParams.remove(k));
+    qp.addAll(_pkg.queryParams);
 
     var ps = <String>[];
     for (var el in uri1.pathSegments) {
       if (el.startsWith(':')) {
         var k = el.substring(1);
-        if (_urlParams != null && _urlParams.containsKey(k)) {
-          ps.add(_urlParams[k].toString());
+        if (_pkg.urlParams != null && _pkg.urlParams.containsKey(k)) {
+          ps.add(_pkg.urlParams[k].toString());
         } else {
           ps.add(el);
         }
@@ -199,7 +239,11 @@ class ApiCall {
             ? null
             : uri1.fragment);
     print(
-        '[api] [$_method] url: $uri, q: ${uri.query}, qp: ${uri.queryParameters}');
+        '[api] [${_pkg.method}] url: $uri, q: ${uri.query}, qp: ${uri
+            .queryParameters}');
     return uri;
   }
+
+  static const String DEFAULT_USER_AGENT =
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3642.0 Safari/537.36';
 }

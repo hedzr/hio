@@ -24,3 +24,7 @@
 //// Response
 //// https://jsonplaceholder.typicode.com/posts
 //// { "title": "My first post", "id": "101" }
+
+void main() {
+  //
+}

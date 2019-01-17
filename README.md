@@ -30,11 +30,11 @@ import 'package:hio/hio.dart';
 
 void getRepos(String username) async {
   try {
-    var api = new Api()
+    var api = new Api<DefaultOpt>()
       ..debugHeader = true
       ..baseUrl = "https://api.github.com/";
 
-    api.get('users/:user/repos', urlParams: {'user': username})
+    api('users/:user/repos', urlParams: {'user': username})
       ..successCB = (data, resp) {
         print('data: $data');
       }
@@ -52,48 +52,45 @@ void getRepos(String username) async {
 
 ```dart
 void getSomething(String username) async {
-    var api = new Api()
+    var api = new Api<DefaultOpt>()
       ..debugHeader = true
-      ..baseUrl = "https://api.github.com/";
+      ..baseUrl = "https://api.github.com/"
+      // using a global callback to parse the json object.
       ..successCB = (data, resp) {
         print('data: $data');
       }
       ..errorCB = (err, resp) {
         print('ERROR: $err');
       };
-
-    var c = api.get('users/:user/repos', urlParams: {'user': username})
-
+    
+    var c = api('users/:user/repos', method: 'GET', urlParams: {'user': username});
+    
     await c.go();
     
     // second call here
     await c.go(urlParams: {'user': 'google'})
+      // using special callback for data processing itself
+      ..successCB = (data, resp) {
+        print('data: $data');
+      }
+      ..errorCB = (err, resp) {
+        print('ERROR: $err');
+      };
 }
 ```
 
-#### Define your API class
+#### Define your API class (swapi.co)
 
 ```dart
-class SwApi extends Api {
-  int xRateLimitLimit = 60;
-  int xRateLimitRemaining = 59;
-  int xRateLimitReset = 1547617535;
-  String xGitHubRequestId;
-
+class SwApi extends Api<DefaultOpt> {
   SwApi() : super() {
     this
       ..debugHeader = true
       ..debugBody = false
       ..baseUrl = 'https://swapi.co/api/'
-      ..addOnSendHandler((req) {
+      ..addOnSendHandler((req, c) {
         return true;
-      })
-      ..successCB = (data, resp) {
-        print('data: $data');
-      }
-      ..errorCB = (err, resp) {
-        print('ERROR: $err');
-      };
+      });
   }
 
   @override
@@ -102,47 +99,69 @@ class SwApi extends Api {
   }
 }
 
-# and use it:
+// and use it:
+void run() async {
     var api = SwApi();
 
     var x = api('people/:id', method: 'GET', urlParams: {'id': 1});
     await x.go();
 
-    await api.get('people/:id', urlParams: {'id': 2}).go();
+    await x.go('people/:id', urlParams: {'id': 2});
+}
 ```
 
-#### Preprocessing the received data
+### Pre-processing the received data (implements GitHub Api)
 
 ```dart
-class GithubApi extends Api {
+
+class GithubOpt extends DefaultOpt {
   int xRateLimitLimit = 60;
   int xRateLimitRemaining = 59;
   int xRateLimitReset = 1547617535;
   String xGitHubRequestId;
   Map<String, String> links;
 
-  String trim(String s, {String chars = ' '}) {
-    for (var i = 0; i < chars.length; i++) {
-      var char = chars[i];
-      if (s.startsWith(char)) s = s.substring(1);
-      if (s.endsWith(char)) s = s.substring(0, s.length - 1);
-    }
-    return s;
+  @override
+  String toString() {
+    return 'GithubApiCall[xRateLimitLimit:$xRateLimitLimit, xRateLimitRemaining:$xRateLimitRemaining, xRateLimitReset: $xRateLimitReset, ${toStringPart()}]';
   }
 
+  GithubOpt();
+
+  GithubOpt.init(
+      String method,
+      String url,
+      Map<String, String> headers,
+      Map<String, dynamic> urlParams,
+      Map<String, dynamic> queryParams,
+      Map<String, dynamic> bodyParams)
+      : super.init(method, url, headers, urlParams, queryParams, bodyParams);
+
+//  factory GithubApiCall.create(
+//          String method,
+//          String url,
+//          Map<String, String> headers,
+//          Map<String, dynamic> urlParams,
+//          Map<String, dynamic> queryParams,
+//          Map<String, dynamic> bodyParams) =>
+//      GithubApiCall.init(
+//          method, url, headers, urlParams, queryParams, bodyParams);
+}
+
+class GithubApi extends Api<GithubOpt> {
   GithubApi() : super() {
     this
       ..debugHeader = true
       ..debugBody = false
       ..baseUrl = 'https://api.github.com/'
       ..accept = 'application/vnd.github.v3+json'
-      ..addOnSendHandler((req) {
-        return true;
-      })
-      ..addOnProcessDataHandler((dynamic data, HttpClientResponse resp) {
+      ..addOnSendHandler((req, c) => true)
+      ..addOnProcessDataHandler(
+          (dynamic data, HttpClientResponse resp, GithubOpt cc) {
         resp.headers.forEach((k, values) {
           // 'cache-control',
-          links ??= <String, String>{};
+          //GithubApiCall cc = c;
+          cc.links ??= <String, String>{};
           if (k == 'link') {
             for (var ss1 in values[0].split(',')) {
               print('$ss1');
@@ -151,16 +170,16 @@ class GithubApi extends Api {
               var rel = ss2[1].trim();
               if (rel.startsWith('rel=')) rel = rel.substring(4);
               rel = trim(rel, chars: '"');
-              links[rel] = link;
+              cc.links[rel] = link;
             }
           } else if (k == 'x-ratelimit-limit') {
-            xRateLimitLimit = int.tryParse(values[0]) ?? 0;
+            cc.xRateLimitLimit = int.tryParse(values[0]) ?? 0;
           } else if (k == 'x-ratelimit-remaining') {
-            xRateLimitRemaining = int.tryParse(values[0]) ?? 0;
+            cc.xRateLimitRemaining = int.tryParse(values[0]) ?? 0;
           } else if (k == 'x-ratelimit-reset') {
-            xRateLimitReset = int.tryParse(values[0]) ?? 0;
+            cc.xRateLimitReset = int.tryParse(values[0]) ?? 0;
           } else if (k == 'x-github-request-id') {
-            xGitHubRequestId = values[0];
+            cc.xGitHubRequestId = values[0];
           }
         });
         return data;
@@ -169,23 +188,41 @@ class GithubApi extends Api {
 
   @override
   String toString() {
-    return 'GithubApi[xRateLimitLimit:$xRateLimitLimit, xRateLimitRemaining:$xRateLimitRemaining, xRateLimitReset: $xRateLimitReset]';
+    return 'GithubApi[]';
+  }
+
+  @override
+  Broker<GithubOpt> call(String apiEntry,
+      {String method = 'GET',
+      Map<String, String> headers,
+      Map<String, dynamic> urlParams,
+      Map<String, dynamic> queryParams,
+      Map<String, dynamic> bodyParams,
+      Map<String, dynamic> params = const {}}) {
+    var opt = GithubOpt.init(
+        method, getUrl(apiEntry), headers, urlParams, queryParams, bodyParams);
+    print('opt: $opt, getUrl: ${getUrl(apiEntry)}');
+    return create(opt);
   }
 }
 
-# and use it:
-    var api = GithubApi()
-      ..successCB = (data, resp) {
+// and use it:
+void run() async {
+    var api = GithubApi();
+    var x = api('users/:user/repos', urlParams: {'user': 'hedzr'})
+      ..successCB = (data, resp, c) {
         print('data received: $data');
-        print('links: ${api.links}');
+        print('links: ${c.links}');
       }
-      ..errorCB = (err, resp) {
+      ..errorCB = (err, resp, c) {
         print('ERROR: $err');
       };
 
-    var x = api('users/:user/repos', urlParams: {'user': 'hedzr'});
-
     await x.go();
+
+    // make the second call:
+    await x.go('users/:user/repos', method: 'GET', urlParams: {'user': 'google'});
+}
 ```
 
 

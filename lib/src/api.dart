@@ -1,11 +1,22 @@
 import 'package:hio/src/api_call.dart';
 import 'package:hio/src/types.dart';
 
+class ApiUtil {
+  String trim(String s, {String chars = ' '}) {
+    for (var i = 0; i < chars.length; i++) {
+      var char = chars[i];
+      if (s.startsWith(char)) s = s.substring(1);
+      if (s.endsWith(char)) s = s.substring(0, s.length - 1);
+    }
+    return s;
+  }
+}
+
 ///
 /// Using Api class:
 ///
 ///
-class Api {
+class Api<AC extends DefaultOpt> extends ApiUtil {
   bool _debugHeader = false;
 
   bool get debugHeader => _debugHeader;
@@ -24,187 +35,203 @@ class Api {
   Duration connectionTimeout;
   String userAgent;
 
-  List<ApiOnSendFn> _onSendFns;
+  List<ApiOnSendFn<AC>> _onSendFns;
 
-  List<ApiOnSendFn> get onSendFns => _onSendFns;
+  List<ApiOnSendFn<AC>> get onSendFns => _onSendFns;
 
-  void addOnSendHandler(ApiOnSendFn fn) {
-    _onSendFns ??= <ApiOnSendFn>[];
+  void addOnSendHandler(ApiOnSendFn<AC> fn) {
+    _onSendFns ??= <ApiOnSendFn<AC>>[];
     _onSendFns.add(fn);
   }
 
-  List<ApiOnProcessDataFn> _onProcessDataFns;
+  List<ApiOnProcessDataFn<AC>> _onProcessDataFns;
 
-  List<ApiOnProcessDataFn> get onProcessDataFns => _onProcessDataFns;
+  List<ApiOnProcessDataFn<AC>> get onProcessDataFns => _onProcessDataFns;
 
-  void addOnProcessDataHandler(ApiOnProcessDataFn fn) {
-    _onProcessDataFns ??= <ApiOnProcessDataFn>[];
+  void addOnProcessDataHandler(ApiOnProcessDataFn<AC> fn) {
+    _onProcessDataFns ??= <ApiOnProcessDataFn<AC>>[];
     _onProcessDataFns.add(fn);
   }
 
-  ApiOkFn successCB;
+  ApiOkFn<AC> successCB;
 
-  ApiErrorFn errorCB;
+  ApiErrorFn<AC> errorCB;
 
-  ApiCall call(String apiEntry,
+//  AC call(String apiEntry,
+//      {String method = 'GET',
+//      Map<String, String> headers,
+//      Map<String, dynamic> urlParams,
+//      Map<String, dynamic> queryParams,
+//      Map<String, dynamic> bodyParams,
+//      Map<String, dynamic> params = const {}}) {
+//    return _call(apiEntry,
+//        method: method,
+//        headers: headers,
+//        urlParams: urlParams,
+//        queryParams: queryParams,
+//        bodyParams: bodyParams,
+//        params: params);
+//  }
+//
+//  AC get(String apiEntry,
+//      {Map<String, String> headers,
+//      Map<String, dynamic> urlParams,
+//      Map<String, dynamic> queryParams,
+//      Map<String, dynamic> bodyParams,
+//      Map<String, dynamic> params = const {}}) {
+//    return _call(apiEntry,
+//        method: 'GET',
+//        headers: headers,
+//        urlParams: urlParams,
+//        queryParams: queryParams,
+//        bodyParams: bodyParams,
+//        params: params);
+//  }
+//
+//  AC head(String apiEntry,
+//      {Map<String, String> headers,
+//      Map<String, dynamic> urlParams,
+//      Map<String, dynamic> queryParams,
+//      Map<String, dynamic> bodyParams,
+//      Map<String, dynamic> params = const {}}) {
+//    return _call(apiEntry,
+//        method: 'HEAD',
+//        headers: headers,
+//        urlParams: urlParams,
+//        queryParams: queryParams,
+//        bodyParams: bodyParams,
+//        params: params);
+//  }
+//
+//  AC post(String apiEntry,
+//      {Map<String, String> headers,
+//      Map<String, dynamic> urlParams,
+//      Map<String, dynamic> queryParams,
+//      Map<String, dynamic> bodyParams,
+//      Map<String, dynamic> params = const {}}) {
+//    return _call(apiEntry,
+//        method: 'POST',
+//        headers: headers,
+//        urlParams: urlParams,
+//        queryParams: queryParams,
+//        bodyParams: bodyParams,
+//        params: params);
+//  }
+//
+//  AC put(String apiEntry,
+//      {Map<String, String> headers,
+//      Map<String, dynamic> urlParams,
+//      Map<String, dynamic> queryParams,
+//      Map<String, dynamic> bodyParams,
+//      Map<String, dynamic> params = const {}}) {
+//    return _call(apiEntry,
+//        method: 'PUT',
+//        headers: headers,
+//        urlParams: urlParams,
+//        queryParams: queryParams,
+//        bodyParams: bodyParams,
+//        params: params);
+//  }
+//
+//  AC delete(String apiEntry,
+//      {Map<String, String> headers,
+//      Map<String, dynamic> urlParams,
+//      Map<String, dynamic> queryParams,
+//      Map<String, dynamic> bodyParams,
+//      Map<String, dynamic> params = const {}}) {
+//    return _call(apiEntry,
+//        method: 'DELETE',
+//        headers: headers,
+//        urlParams: urlParams,
+//        queryParams: queryParams,
+//        bodyParams: bodyParams,
+//        params: params);
+//  }
+//
+//  AC connect(String apiEntry,
+//      {Map<String, String> headers,
+//      Map<String, dynamic> urlParams,
+//      Map<String, dynamic> queryParams,
+//      Map<String, dynamic> bodyParams,
+//      Map<String, dynamic> params = const {}}) {
+//    return _call(apiEntry,
+//        method: 'CONNECT',
+//        headers: headers,
+//        urlParams: urlParams,
+//        queryParams: queryParams,
+//        bodyParams: bodyParams,
+//        params: params);
+//  }
+//
+//  AC options(String apiEntry,
+//      {Map<String, String> headers,
+//      Map<String, dynamic> urlParams,
+//      Map<String, dynamic> queryParams,
+//      Map<String, dynamic> bodyParams,
+//      Map<String, dynamic> params = const {}}) {
+//    return _call(apiEntry,
+//        method: 'OPTIONS',
+//        headers: headers,
+//        urlParams: urlParams,
+//        queryParams: queryParams,
+//        bodyParams: bodyParams,
+//        params: params);
+//  }
+//
+//  AC trace(String apiEntry,
+//      {Map<String, String> headers,
+//      Map<String, dynamic> urlParams,
+//      Map<String, dynamic> queryParams,
+//      Map<String, dynamic> bodyParams,
+//      Map<String, dynamic> params = const {}}) {
+//    return _call(apiEntry,
+//        method: 'TRACE',
+//        headers: headers,
+//        urlParams: urlParams,
+//        queryParams: queryParams,
+//        bodyParams: bodyParams,
+//        params: params);
+//  }
+//
+//  AC patch(String apiEntry,
+//      {Map<String, String> headers,
+//      Map<String, dynamic> urlParams,
+//      Map<String, dynamic> queryParams,
+//      Map<String, dynamic> bodyParams,
+//      Map<String, dynamic> params = const {}}) {
+//    return _call(apiEntry,
+//        method: 'PATCH',
+//        headers: headers,
+//        urlParams: urlParams,
+//        queryParams: queryParams,
+//        bodyParams: bodyParams,
+//        params: params);
+//  }
+
+  String getUrl(String apiEntry) => '$baseUrl$apiEntry';
+
+  final List<Broker<AC>> _opts = [];
+
+  Broker<AC> create(AC strategy) {
+    var x = _createOpt(strategy);
+    _opts.add(x);
+    return x;
+  }
+
+  Broker<AC> _createOpt(AC strategy) => Broker<AC>.create(strategy, this);
+
+  /// `call(...)` should be invoked only from an Api-derived class with
+  /// AC=[DefaultOpt].
+  ///
+  Broker<AC> call(String apiEntry,
       {String method = 'GET',
       Map<String, String> headers,
       Map<String, dynamic> urlParams,
       Map<String, dynamic> queryParams,
       Map<String, dynamic> bodyParams,
-      params = const {}}) {
-    return _call(apiEntry,
-        method: method,
-        headers: headers,
-        urlParams: urlParams,
-        queryParams: queryParams,
-        bodyParams: bodyParams,
-        params: params);
-  }
-
-  ApiCall get(String apiEntry,
-      {Map<String, String> headers,
-      Map<String, dynamic> urlParams,
-      Map<String, dynamic> queryParams,
-      Map<String, dynamic> bodyParams,
-      params = const {}}) {
-    return _call(apiEntry,
-        method: 'GET',
-        headers: headers,
-        urlParams: urlParams,
-        queryParams: queryParams,
-        bodyParams: bodyParams,
-        params: params);
-  }
-
-  ApiCall head(String apiEntry,
-      {Map<String, String> headers,
-      Map<String, dynamic> urlParams,
-      Map<String, dynamic> queryParams,
-      Map<String, dynamic> bodyParams,
-      params = const {}}) {
-    return _call(apiEntry,
-        method: 'HEAD',
-        headers: headers,
-        urlParams: urlParams,
-        queryParams: queryParams,
-        bodyParams: bodyParams,
-        params: params);
-  }
-
-  ApiCall post(String apiEntry,
-      {Map<String, String> headers,
-      Map<String, dynamic> urlParams,
-      Map<String, dynamic> queryParams,
-      Map<String, dynamic> bodyParams,
-      params = const {}}) {
-    return _call(apiEntry,
-        method: 'POST',
-        headers: headers,
-        urlParams: urlParams,
-        queryParams: queryParams,
-        bodyParams: bodyParams,
-        params: params);
-  }
-
-  ApiCall put(String apiEntry,
-      {Map<String, String> headers,
-      Map<String, dynamic> urlParams,
-      Map<String, dynamic> queryParams,
-      Map<String, dynamic> bodyParams,
-      params = const {}}) {
-    return _call(apiEntry,
-        method: 'PUT',
-        headers: headers,
-        urlParams: urlParams,
-        queryParams: queryParams,
-        bodyParams: bodyParams,
-        params: params);
-  }
-
-  ApiCall delete(String apiEntry,
-      {Map<String, String> headers,
-      Map<String, dynamic> urlParams,
-      Map<String, dynamic> queryParams,
-      Map<String, dynamic> bodyParams,
-      params = const {}}) {
-    return _call(apiEntry,
-        method: 'DELETE',
-        headers: headers,
-        urlParams: urlParams,
-        queryParams: queryParams,
-        bodyParams: bodyParams,
-        params: params);
-  }
-
-  ApiCall connect(String apiEntry,
-      {Map<String, String> headers,
-      Map<String, dynamic> urlParams,
-      Map<String, dynamic> queryParams,
-      Map<String, dynamic> bodyParams,
-      params = const {}}) {
-    return _call(apiEntry,
-        method: 'CONNECT',
-        headers: headers,
-        urlParams: urlParams,
-        queryParams: queryParams,
-        bodyParams: bodyParams,
-        params: params);
-  }
-
-  ApiCall options(String apiEntry,
-      {Map<String, String> headers,
-      Map<String, dynamic> urlParams,
-      Map<String, dynamic> queryParams,
-      Map<String, dynamic> bodyParams,
-      params = const {}}) {
-    return _call(apiEntry,
-        method: 'OPTIONS',
-        headers: headers,
-        urlParams: urlParams,
-        queryParams: queryParams,
-        bodyParams: bodyParams,
-        params: params);
-  }
-
-  ApiCall trace(String apiEntry,
-      {Map<String, String> headers,
-      Map<String, dynamic> urlParams,
-      Map<String, dynamic> queryParams,
-      Map<String, dynamic> bodyParams,
-      params = const {}}) {
-    return _call(apiEntry,
-        method: 'TRACE',
-        headers: headers,
-        urlParams: urlParams,
-        queryParams: queryParams,
-        bodyParams: bodyParams,
-        params: params);
-  }
-
-  ApiCall patch(String apiEntry,
-      {Map<String, String> headers,
-      Map<String, dynamic> urlParams,
-      Map<String, dynamic> queryParams,
-      Map<String, dynamic> bodyParams,
-      params = const {}}) {
-    return _call(apiEntry,
-        method: 'PATCH',
-        headers: headers,
-        urlParams: urlParams,
-        queryParams: queryParams,
-        bodyParams: bodyParams,
-        params: params);
-  }
-
-  ApiCall _call(String apiEntry,
-      {String method = 'GET',
-      Map<String, String> headers,
-      Map<String, dynamic> urlParams,
-      Map<String, dynamic> queryParams,
-      Map<String, dynamic> bodyParams,
-      params = const {}}) {
-    return ApiCall(this, method, '$baseUrl$apiEntry', headers, urlParams,
-        queryParams, bodyParams);
+        Map<String, dynamic> params = const {}}) {
+    var opt = DefaultOpt.init(
+        method, getUrl(apiEntry), headers, urlParams, queryParams, bodyParams);
+    return create(opt as AC);
   }
 }
