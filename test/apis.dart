@@ -56,13 +56,13 @@ class GithubOpt extends DefaultOpt {
       if (k == 'link') {
         _parseLinks(values[0]);
       } else if (k == 'x-ratelimit-limit') {
-        cc.xRateLimitLimit = int.tryParse(values[0]) ?? 0;
+        xRateLimitLimit = int.tryParse(values[0]) ?? 0;
       } else if (k == 'x-ratelimit-remaining') {
-        cc.xRateLimitRemaining = int.tryParse(values[0]) ?? 0;
+        xRateLimitRemaining = int.tryParse(values[0]) ?? 0;
       } else if (k == 'x-ratelimit-reset') {
-        cc.xRateLimitReset = int.tryParse(values[0]) ?? 0;
+        xRateLimitReset = int.tryParse(values[0]) ?? 0;
       } else if (k == 'x-github-request-id') {
-        cc.xGitHubRequestId = values[0];
+        xGitHubRequestId = values[0];
       }
     });
   }
