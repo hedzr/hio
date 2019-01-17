@@ -1,8 +1,8 @@
 name: hio
-description: make Api call easy, an Flutter package.
-version: 0.0.1
+description: Enhanced Http Client for Dart/Flutter. Make Api call easy, an Dart/Flutter package.
+version: 0.1.0
 author: Hedzr Yeh <hedzrz@gmail.com>
-homepage: https://github.com/hedzr
+homepage: https://github.com/hedzr/hio
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"

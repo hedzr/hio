@@ -18,7 +18,7 @@ typedef bool ApiOnSendFn(HttpClientRequest req);
 typedef dynamic ApiOnProcessDataFn(dynamic data, HttpClientResponse resp);
 
 ///
-/// using Api class:
+/// Using Api class:
 ///
 ///
 class Api {
@@ -55,18 +55,26 @@ class Api {
     _onProcessDataFns.add(fn);
   }
 
-  DslCall get(String apiEntry,
+  ApiCall get(String apiEntry,
       {Map<String, String> headers,
       Map<String, dynamic> urlParams,
       Map<String, dynamic> queryParams,
       Map<String, dynamic> bodyParams,
       params = const {}}) {
-    return new DslCall(this, "GET", "$baseUrl$apiEntry", headers, urlParams,
+    return new ApiCall(
+        this,
+        "GET",
+        "$baseUrl$apiEntry",
+        headers,
+        urlParams,
         queryParams, bodyParams);
   }
 }
 
-class DslCall {
+///
+/// ApiCall
+///
+class ApiCall {
   Api _api;
   String _method;
   String _url;
@@ -78,7 +86,7 @@ class DslCall {
   static const String DEFAULT_USER_AGENT =
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3642.0 Safari/537.36';
 
-  DslCall(this._api, this._method, this._url, this._headers, this._urlParams,
+  ApiCall(this._api, this._method, this._url, this._headers, this._urlParams,
       this._queryParams, this._bodyParams);
 
   ApiOkFn _successFn;

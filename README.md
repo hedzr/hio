@@ -14,7 +14,7 @@ For help getting started with Flutter, view our [online documentation](https://f
 
 ```yaml
 dependencies:
-  dio: x.x.x  #latest version
+  hio: x.x.x  #latest version
 ```
 
 
