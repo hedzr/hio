@@ -1,18 +1,18 @@
 language: dart
 
 dart:
-- dev
+# - dev
 - stable
 
 dart_task:
 - test: --platform vm
-- test: --platform chrome
+# - test: --platform chrome
 - dartanalyzer: --fatal-infos --fatal-warnings .
 
 matrix:
   include:
-  - dart: dev
-    dart_task: dartfmt
+  # - dart: dev
+  #  dart_task: dartfmt
 
 # Only building master means that we don't run two builds for each pull request.
 branches:
