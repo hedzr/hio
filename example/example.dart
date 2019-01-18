@@ -1,6 +1,8 @@
+import 'dart:io';
+
 import '../test/apis.dart';
 
-void main() async {
+Future<HttpClientResponse> githubDemo() async {
   var api = GithubApi();
   var x = api('users/:user/repos', urlParams: {'user': 'google'})
     ..successCB = (data, resp, c) {
@@ -11,7 +13,11 @@ void main() async {
       print('ERROR: $err');
     };
 
-  await x.go();
+  return x.go();
+}
+
+void main() async {
+  await githubDemo();
 
   print('--------------------- github api test ok..');
 }
