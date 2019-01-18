@@ -1,6 +1,6 @@
 # hio
 
-[![Build Status](https://travis-ci.org/hedzr/hio.svg?branch=master)](https://travis-ci.org/hedzr/hio)
+[![Build Status](https://travis-ci.com/hedzr/hio.svg?token=fpUigjpscfp3TbfqAu2D&branch=master)](https://travis-ci.com/hedzr/hio)
 [![Pub](https://img.shields.io/pub/v/hio.svg)](https://pub.dartlang.org/packages/hio)
 
 Enhanced Http Client for Dart/Flutter.
