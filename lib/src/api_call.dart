@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -73,16 +74,16 @@ class ApiBroker<AC extends ApiOpt> {
     if (errorCB != null) errorCB(err, resp, _pkg);
   }
 
-  Future<HttpClientResponse> go(
-      {String method,
-      String apiEntry,
-      Map<String, String> headers,
-      Map<String, dynamic> urlParams,
-      Map<String, dynamic> queryParams,
-      Map<String, dynamic> bodyParams}) async {
+  Future<HttpClientResponse> go({String method,
+    String apiEntry,
+    Map<String, String> headers,
+    Map<String, dynamic> urlParams,
+    Map<String, dynamic> queryParams,
+    Map<String, dynamic> bodyParams}) async {
     if (method != null && method.isNotEmpty) _pkg.method = method;
-    if (apiEntry != null && apiEntry.isNotEmpty)
+    if (apiEntry != null && apiEntry.isNotEmpty) {
       _pkg.url = '${api.baseUrl}$apiEntry';
+    }
 
     _pkg.headers ??= {};
     _pkg.urlParams ??= {};
@@ -114,12 +115,14 @@ class ApiBroker<AC extends ApiOpt> {
     }
 
     var httpClient = HttpClient();
-    if (api.connectionTimeout != null)
+    if (api.connectionTimeout != null) {
       httpClient.connectionTimeout = api.connectionTimeout;
-    if (api.userAgent != null && api.userAgent.isNotEmpty)
+    }
+    if (api.userAgent != null && api.userAgent.isNotEmpty) {
       httpClient.userAgent = api.userAgent;
-    else
+    } else {
       httpClient.userAgent = DEFAULT_USER_AGENT;
+    }
 
     var uri = _buildUrl(_pkg.url);
 
@@ -153,7 +156,7 @@ class ApiBroker<AC extends ApiOpt> {
 
       return request.close();
       //
-    }).then((HttpClientResponse response) async {
+    }).then((HttpClientResponse response) {
       print('[api] response.statusCode = ${response.statusCode}');
 
       // Process the response.

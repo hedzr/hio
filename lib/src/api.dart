@@ -35,6 +35,9 @@ class Api<AC extends ApiOpt> extends ApiUtil {
   Duration connectionTimeout;
   String userAgent;
 
+  // TODO idleTimeout, autoUncompress
+  // TODO basic auth, certs and ignore, ...
+
   List<ApiOnSendFn<AC>> _onSendFns;
 
   List<ApiOnSendFn<AC>> get onSendFns => _onSendFns;
