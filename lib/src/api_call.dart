@@ -158,7 +158,7 @@ class ApiBroker<AC extends ApiOpt> {
 
       // Process the response.
       if (response.statusCode == HttpStatus.ok) {
-        var jsonX = await response.transform(utf8.decoder).join();
+        var jsonX = await utf8.decoder.bind(response).join();
 
         /// https://api.dartlang.org/stable/2.1.0/dart-convert/dart-convert-library.html
         var data = json.decode(jsonX);

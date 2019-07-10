@@ -17,7 +17,7 @@ void test1() async {
   var response = await request.close(); // sends the request
 
   // transforms and prints the response
-  await for (var contents in response.transform(const Utf8Decoder())) {
+  await for (var contents in const Utf8Decoder().bind(response)) {
     print('test1 result:');
     print(contents);
   }
@@ -32,8 +32,8 @@ void main() async {
     await HttpClient()
         .getUrl(Uri.parse('https://swapi.co/api/people/1'))
         .then((request) => request.close()) // sends the request
-        .then((response) => response
-        .transform(const Utf8Decoder())
+        .then((response) => const Utf8Decoder()
+            .bind(response)
             .listen(print)); // transforms and prints the response
 
     print('2');
