@@ -1,8 +1,6 @@
-import 'dart:io';
-
 import '../test/apis.dart';
 
-Future<HttpClientResponse> githubDemo() async {
+dynamic githubDemo() async {
   var api = GithubApi();
   var x = api('users/:user/repos', urlParams: {'user': 'google'})
     ..successCB = (data, resp, c) {

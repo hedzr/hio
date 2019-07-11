@@ -8,6 +8,9 @@ build/
 ios/.generated/
 ios/Flutter/Generated.xcconfig
 ios/Runner/GeneratedPluginRegistrant.*
+example/ios/.generated/
+example/ios/Flutter/Generated.xcconfig
+example/ios/Runner/GeneratedPluginRegistrant.*
 
 local.properties
 

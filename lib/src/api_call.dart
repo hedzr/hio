@@ -156,7 +156,7 @@ class ApiBroker<AC extends ApiOpt> {
 
       return request.close();
       //
-    }).then((HttpClientResponse response) {
+    }).then((HttpClientResponse response) async {
       print('[api] response.statusCode = ${response.statusCode}');
 
       // Process the response.
@@ -185,6 +185,8 @@ class ApiBroker<AC extends ApiOpt> {
         print('[api] error: response.statusCode = ${response.statusCode}');
         invokeError(response.statusCode, response);
       }
+    }).catchError((d, e) {
+      print('[api] error: exception: $e');
     });
     //} catch (e) {
     //  if (_errorFn != null) _errorFn(e, null);
