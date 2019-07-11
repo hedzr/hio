@@ -1,6 +1,6 @@
 name: hio
 description: Enhanced Http Client for Dart/Flutter. Make Api call easy, an Dart/Flutter package.
-version: 0.3.6
+version: 0.3.7
 author: Hedzr Yeh <hedzrz@gmail.com>
 homepage: https://github.com/hedzr
 
@@ -12,10 +12,10 @@ dependencies:
 #  sdk: flutter
 
 dev_dependencies:
-  #flutter_test:
-  #  sdk: flutter
+  flutter_test:
+    sdk: flutter
   test: ^1.5.0
-  pedantic: ^1.4.0
+  pedantic: ^1.7.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
